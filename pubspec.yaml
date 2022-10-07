@@ -39,6 +39,7 @@ dependencies:
   flutter_html:
   shared_preferences: 
   loading_animation_widget: 
+  countdown_progress_indicator: 
 
 dev_dependencies:
   flutter_test:

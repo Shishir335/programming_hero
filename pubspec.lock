@@ -85,6 +85,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
+  countdown_progress_indicator:
+    dependency: "direct main"
+    description:
+      name: countdown_progress_indicator
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2"
   crypto:
     dependency: transitive
     description:
@@ -468,7 +475,7 @@ packages:
       name: tuple
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   typed_data:
     dependency: transitive
     description:
