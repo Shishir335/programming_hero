@@ -3,6 +3,7 @@ import 'package:programming_hero/api/api_services.dart';
 import 'package:programming_hero/app_config.dart';
 import 'package:programming_hero/provider/quiz_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'question_answer_screen.dart';
 
@@ -23,7 +24,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _apiService.questions().then((value) {
       final provider = Provider.of<QuizProvider>(context, listen: false);
       provider.changeQuestions(value['questions']);
-      provider.notify();
+      provider.chnageAnswerSet();
     });
   }
 
@@ -52,11 +53,16 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 20)),
               const SizedBox(height: 5),
-              const Text('500 Points',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20)),
+              FutureBuilder(
+                future: getScore(),
+                builder: (context, AsyncSnapshot snapshot) {
+                  return  Text( (snapshot.hasData ? snapshot.data : '0') + ' Points',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20));
+                }
+              ),
               const SizedBox(height: 40),
               InkWell(
                 onTap: () {
@@ -83,5 +89,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ]),
       ),
     );
+  }
+
+  getScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('highScore');
   }
 }
