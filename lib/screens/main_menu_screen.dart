@@ -7,6 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'question_answer_screen.dart';
 
+/*
+  this is the main menu section where user can see their all time heigh score from database
+  and also there is a start button to enter the quiz game
+*/
+
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({Key? key}) : super(key: key);
 
@@ -20,6 +25,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   @override
   void initState() {
     super.initState();
+
+    // initially i am loading the question to save some time here.
+    //this is the api section
+    //fetching data from api
 
     _apiService.questions().then((value) {
       final provider = Provider.of<QuizProvider>(context, listen: false);
@@ -37,6 +46,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // here is the icon
               SizedBox(
                 width: MediaQuery.of(context).size.width / 1.5,
                 child: Image.asset(appIcon),
@@ -47,6 +57,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 34)),
               const SizedBox(height: 30),
+
+              // heighscore portion
               const Text('Highscore',
                   style: TextStyle(
                       color: Colors.white,
@@ -64,6 +76,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                             fontSize: 20));
                   }),
               const SizedBox(height: 40),
+
+              // button to enter to the game
+
               InkWell(
                 onTap: () {
                   Navigator.of(context).pushAndRemoveUntil(
@@ -91,6 +106,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
+  // getting scroe by this fuction
   getScore() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('highScore');

@@ -7,6 +7,15 @@ import 'package:programming_hero/screens/main_menu_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/*
+this is the most important screen of the app
+most of the fuctionalities are here
+
+the questions will be shown for 10 mins. if the user faild to
+answer a question within 10 sec the app will show the 
+correnct ans and move on to next question
+*/
+
 class QuestionAnswerScreen extends StatefulWidget {
   const QuestionAnswerScreen({Key? key}) : super(key: key);
 
@@ -15,6 +24,7 @@ class QuestionAnswerScreen extends StatefulWidget {
 }
 
 class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
+  // this fuction fill start the 10 sec timer
   void startTimer() async {
     print(1);
     final provider = Provider.of<QuizProvider>(context, listen: false);
@@ -25,7 +35,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
       if (provider.timer < 1) {
         t.cancel();
         print(3);
-
+        // this portion is to show the correct ans if user
+        // fails to answer a question in given time
         if (provider.selectedQuestionIndex < provider.questions.length - 1) {
           provider.changeAnswerIndex(provider.answers.indexWhere((element) {
             return element.label ==
@@ -46,11 +57,13 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
           dialog(context, provider);
         }
       } else if (provider.cancelTImer) {
+        // if time runs out this will stop the timer
         print(4);
 
         t.cancel();
       } else {
         print(5);
+        // this is to decrease the timer
 
         provider.chnageTimer();
       }
@@ -60,12 +73,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
   @override
   void initState() {
     super.initState();
+    // initializing timer
     startTimer();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -88,6 +97,7 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Stack(alignment: Alignment.center, children: [
+                        // question number
                         Positioned(
                           left: 0,
                           child: Text(
@@ -101,9 +111,11 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18)),
                         ),
+                        // counter
                         Text(provider.timer.toString(),
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20)),
+                        // score
                         Positioned(
                           right: 0,
                           child: Text('Score: ' + provider.score.toString(),
@@ -116,6 +128,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
+
+                  // question portion
                   Expanded(
                       child: Padding(
                     padding: const EdgeInsets.all(10),
@@ -164,6 +178,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                       ),
                     ),
                   )),
+
+                  // answer set
                   Expanded(
                       child: Padding(
                           padding: const EdgeInsets.all(20),
@@ -175,11 +191,20 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                             itemBuilder: (context, index) {
                               return InkWell(
                                 onTap: () async {
+                                  // in this portion on tapping in the answer
+                                  // if the answer is correct it will be green and the score will be added
+                                  // in the score board. else the selected ans will be red and
+                                  // the correct and will show as green.
+
+                                  // this will not let user to double click in an answer
                                   if (provider.answersIndex == null) {
+                                    // this is a flag to control the timer
                                     provider.chnageCancelTimer(true);
 
+                                    // changing selected answer
                                     provider.changeAnswerIndex(index);
 
+                                    // getting the correct and if the ans is wrong
                                     if (provider.answers[provider.answersIndex!]
                                             .label ==
                                         provider.questions[
@@ -190,6 +215,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                                               provider.selectedQuestionIndex]
                                           ['score']);
                                     }
+
+                                    // this delay is to show the correct ans and wrong ans
 
                                     Future.delayed(const Duration(seconds: 2),
                                         () {
@@ -203,6 +230,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                                         provider.resetTimer();
                                         startTimer();
                                       } else {
+                                        // this dialogue will show at the end of the gaem when the question
+                                        // will be over. this will show score and take back to main menu screen.
                                         dialog(context, provider);
                                       }
                                     });
@@ -255,6 +284,7 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
     });
   }
 
+// this is the end banner that will show the score
   Future<dynamic> dialog(BuildContext context, QuizProvider provider) {
     return showDialog(
         barrierDismissible: false,
@@ -277,6 +307,7 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                           'highScore', (score + provider.score).toString());
                     }
 
+                    // resetting all the value
                     provider.resetScore();
                     provider.resetIndex();
                     provider.resetAnswer();
