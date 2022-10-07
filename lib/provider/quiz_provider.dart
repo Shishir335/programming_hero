@@ -82,4 +82,25 @@ class QuizProvider with ChangeNotifier {
     _correctAns = null;
     notifyListeners();
   }
+
+  int _timer = 10;
+  int get timer => _timer;
+
+  chnageTimer() {
+    _timer--;
+    notifyListeners();
+  }
+
+  resetTimer() {
+    _timer = 10;
+    notifyListeners();
+  }
+
+  bool _cancelTImer = false;
+  bool get cancelTImer => _cancelTImer;
+
+  chnageCancelTimer(bool value) {
+    _cancelTImer = value;
+    notifyListeners();
+  }
 }

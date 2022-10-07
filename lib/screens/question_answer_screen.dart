@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:countdown_progress_indicator/countdown_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:programming_hero/app_config.dart';
 import 'package:programming_hero/provider/quiz_provider.dart';
@@ -16,66 +15,57 @@ class QuestionAnswerScreen extends StatefulWidget {
 }
 
 class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
-  Timer? _timer;
-
-  final _controller = CountDownController();
-
-  bool _executeFuture = true;
-
-  int? lastRecorderdIndex;
-
-  int? time;
-
-  @override
-  void initState() {
-    super.initState();
+  void startTimer() async {
+    print(1);
     final provider = Provider.of<QuizProvider>(context, listen: false);
 
-    Future.delayed(const Duration(seconds: 10), () {
-      if (_executeFuture) {
-        _controller.pause();
-        provider.changeAnswerIndex(provider.answers.indexWhere((element) {
-          return element.label ==
-              provider.questions[provider.selectedQuestionIndex]
-                  ['correctAnswer'];
-        }));
-      }
-    });
+    Timer.periodic(const Duration(seconds: 1), (t) {
+      print(2);
 
-    // timer
+      if (provider.timer < 1) {
+        t.cancel();
+        print(3);
 
-    // 2 sec extra to show the correct answer
-    _timer = Timer.periodic(const Duration(seconds: 12), (timer) {
-      _controller.pause();
+        if (provider.selectedQuestionIndex < provider.questions.length - 1) {
+          provider.changeAnswerIndex(provider.answers.indexWhere((element) {
+            return element.label ==
+                provider.questions[provider.selectedQuestionIndex]
+                    ['correctAnswer'];
+          }));
+          Future.delayed(const Duration(seconds: 2), () {
+            provider.increaseIndex();
+            provider.resetAnswer();
+            provider.chnageAnswerSet();
+            provider.chnageCancelTimer(false);
 
-      provider.resetAnswer();
+            provider.resetTimer();
+            startTimer();
+          });
+        } else {
+          t.cancel();
+          dialog(context, provider);
+        }
+      } else if (provider.cancelTImer) {
+        print(4);
 
-      // this timer is to manage the time to give the correct answer
-      Future.delayed(const Duration(seconds: 10), () {
-        _controller.pause();
-        provider.changeAnswerIndex(provider.answers.indexWhere((element) {
-          return element.label ==
-              provider.questions[provider.selectedQuestionIndex]
-                  ['correctAnswer'];
-        }));
-      });
-
-      if (provider.selectedQuestionIndex < provider.questions.length - 1) {
-        provider.increaseIndex();
-        _controller.restart(initialPosition: 0);
-
-        provider.chnageAnswerSet();
+        t.cancel();
       } else {
-        _timer!.cancel();
-        dialog(context, provider);
+        print(5);
+
+        provider.chnageTimer();
       }
     });
   }
 
   @override
+  void initState() {
+    super.initState();
+    startTimer();
+  }
+
+  @override
   void dispose() {
     super.dispose();
-    _timer?.cancel();
   }
 
   @override
@@ -83,14 +73,7 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
     return Consumer<QuizProvider>(builder: (context, provider, _) {
       return WillPopScope(
         onWillPop: () async {
-          provider.resetScore();
-          provider.resetIndex();
-          provider.resetAnswer();
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) {
-            return const MainMenuScreen();
-          }), (route) => false);
-          return true;
+          return false;
         },
         child: Scaffold(
           backgroundColor: backgroundColor,
@@ -118,21 +101,9 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18)),
                         ),
-                        SizedBox(
-                          height: 55,
-                          width: 55,
-                          child: CountDownProgressIndicator(
-                            strokeWidth: 5,
-                            controller: _controller,
-                            valueColor: Colors.red,
-                            backgroundColor: Colors.blue,
-                            initialPosition: 0,
-                            duration: 10,
-                            onComplete: () {
-                              _controller.restart(initialPosition: 0);
-                            },
-                          ),
-                        ),
+                        Text(provider.timer.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20)),
                         Positioned(
                           right: 0,
                           child: Text('Score: ' + provider.score.toString(),
@@ -205,12 +176,7 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                               return InkWell(
                                 onTap: () async {
                                   if (provider.answersIndex == null) {
-                                    _executeFuture = false;
-                                    lastRecorderdIndex =
-                                        provider.selectedQuestionIndex;
-                                    _timer!.cancel();
-                                    // changing answer value
-                                    _controller.pause();
+                                    provider.chnageCancelTimer(true);
 
                                     provider.changeAnswerIndex(index);
 
@@ -225,59 +191,21 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                                           ['score']);
                                     }
 
-                                    // Navigate to main screen
-
                                     Future.delayed(const Duration(seconds: 2),
                                         () {
-                                      if (provider.selectedQuestionIndex ==
-                                          (provider.questions.length - 1)) {
-                                        _timer!.cancel();
-                                        dialog(context, provider);
-                                      } else {
-                                        // changing question
+                                      if (provider.selectedQuestionIndex <
+                                          provider.questions.length - 1) {
                                         provider.increaseIndex();
-
-                                        // changing answer set
-                                        provider.chnageAnswerSet();
                                         provider.resetAnswer();
-                                        _controller.restart(initialPosition: 0);
+                                        provider.chnageAnswerSet();
+                                        provider.chnageCancelTimer(false);
+
+                                        provider.resetTimer();
+                                        startTimer();
+                                      } else {
+                                        dialog(context, provider);
                                       }
-                                    }).then((value) {
-                                      _timer = Timer.periodic(
-                                          const Duration(seconds: 12), (timer) {
-                                        Future.delayed(
-                                            const Duration(seconds: 10), () {
-                                          _controller.pause();
-                                          provider.changeAnswerIndex(provider
-                                              .answers
-                                              .indexWhere((element) {
-                                            return element.label ==
-                                                provider.questions[provider
-                                                        .selectedQuestionIndex]
-                                                    ['correctAnswer'];
-                                          }));
-                                        });
-
-                                        if (provider.selectedQuestionIndex <
-                                            provider.questions.length - 1) {
-                                          provider.increaseIndex();
-                                          _controller.restart(
-                                              initialPosition: 0);
-                                          provider.resetAnswer();
-
-                                          provider.chnageAnswerSet();
-                                        } else {
-                                          provider.resetAnswer();
-                                          _controller.pause();
-
-                                          _timer!.cancel();
-                                          dialog(context, provider);
-                                        }
-                                      });
                                     });
-
-                                    // periodic section for auto change question in every 10 sec
-
                                   }
                                 },
                                 child: Container(
@@ -352,6 +280,8 @@ class _QuestionAnswerScreenState extends State<QuestionAnswerScreen> {
                     provider.resetScore();
                     provider.resetIndex();
                     provider.resetAnswer();
+                    provider.resetTimer();
+                    provider.chnageCancelTimer(false);
 
                     // navigating to main screen if question are over
 

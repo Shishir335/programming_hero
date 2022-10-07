@@ -54,22 +54,22 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       fontSize: 20)),
               const SizedBox(height: 5),
               FutureBuilder(
-                future: getScore(),
-                builder: (context, AsyncSnapshot snapshot) {
-                  return  Text( (snapshot.hasData ? snapshot.data : '0') + ' Points',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20));
-                }
-              ),
+                  future: getScore(),
+                  builder: (context, AsyncSnapshot snapshot) {
+                    return Text(
+                        (snapshot.hasData ? snapshot.data : '0') + ' Points',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20));
+                  }),
               const SizedBox(height: 40),
               InkWell(
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) {
                     return const QuestionAnswerScreen();
-                  }));
+                  }), (route) => false);
                 },
                 child: Container(
                   height: 40,
